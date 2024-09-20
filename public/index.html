@@ -14,12 +14,26 @@
     <a href='./sobre.html'> botao de teste</a>
      
     <script>
+
+        function armazena_imagem_temporariamente(imagem_original) {
+            const reader = new FileReader()
+            reader.onload = function(e) {
+                const base64Image = e.target.result
+                sessionStorage.setItem('imagem_original', base64Image)
+                }
+
+            reader.readAsDataURL(imagem_original)
+        }
+
+
         function upload(img) {
+
+            const file = img.files[0]
             const formData = new FormData()
-            formData.append('image', img.files[0])
+            formData.append('image', file)
 
             try {
-                fetch('http://localhost:3000/upload', {
+                fetch('https://664e-2804-7f0-9301-5a9e-8025-e7b5-5232-b832.ngrok-free.app/upload', {
                     method: 'POST',
                     body: formData
                 })
@@ -36,37 +50,17 @@
             } catch (error) {
                 console.error('Erro:', error)
             }
+
+        armazena_imagem_temporariamente(file)
         }
 
+    
     function chama_pagina_edit(imageId) {
         console.log('Chamando outra pagina')
         sessionStorage.setItem('idDaImagem', imageId)
         window.location.href = 'sobre.html'
     }
 
-    function teste() {
-        try {
-            fetch('http://localhost:3000/getimage', {
-            method: 'GET'
-            })
-            .then(response => response.blob())  // Recebe a resposta como blob
-            .then(blob => {
-            // Cria uma URL temporária para o blob recebido
-            const url = URL.createObjectURL(blob);
-
-            // Seleciona o elemento img do HTML
-            const img = document.getElementById('img');
-
-            // Atribui a URL temporária ao src da imagem
-            img.src = url;
-            })
-            .catch(error => {
-            console.error('Erro ao carregar a imagem:', error);
-            });
-        } catch (error) {
-            console.error('Erro inesperado:', error);
-        }
-    }
 
         // Event listener para o input de arquivo
         const img = document.getElementById('fileinput')

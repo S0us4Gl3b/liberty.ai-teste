@@ -6,21 +6,36 @@
     <title>Document</title>
 </head>
 <body>
-    <img id="img" alt="a imagem deveria ser carregada aqui">
+    <img id="img" alt="a imagem deveria ser carregada aqui" width="500px" height="auto">
 
     <script>
 
         const imageId = sessionStorage.getItem('idDaImagem')
+        const imagem_original = sessionStorage.getItem('imagem_original')
+        var numero_requisicoes = 0
+
+        function mostra_img_original () {
+            document.getElementById('img').src = imagem_original
+        }
+
 
         function busca_imagem() {
-           
-            fetch(`http://localhost:3000/check/${imageId}`)
-                    .then(response => response.ok ? response.blob() : Promise.reject())
-                    .then(blob => {
-                        document.getElementById('img').src = URL.createObjectURL(blob)
-                    })
-            .catch(() => setTimeout(busca_imagem, 3000))
-                
+            numero_requisicoes += 1
+            if (numero_requisicoes === 10) {
+                console.log('tentativas:', numero_requisicoes)
+                return
+            }
+            fetch(`https://664e-2804-7f0-9301-5a9e-8025-e7b5-5232-b832.ngrok-free.app/check/${imageId}`)
+                .then(response => response.ok ? response.blob() : Promise.reject())
+                .then(blob => {
+                    document.getElementById('img').src = URL.createObjectURL(blob)
+                })
+                .catch(() => {
+                    mostra_img_original()
+                    setTimeout(busca_imagem, 300)
+                    
+                })
+            
         }
         
         busca_imagem()
