@@ -9,84 +9,73 @@
 </head>
 <body>
     <h1>Escolha seu arquivo</h1>
-    <input type="file" id="fileinput">
+    <input type="file" id="fileinput" accept="image/*">
     <img id="img" height=500px width=auto>
     <a href='./sobre.html'> botao de teste</a>
+     
     <script>
-
-        async function armazena_imagem(input_image) {
-            console.log('Iniciou o processo de armazenamento');
-
-            const reader = new FileReader();
-            reader.onloadend = function(event) {
-                if (event.target && event.target.result) {
-                    localStorage.setItem('image_input', event.target.result); // Armazena a imagem no localStorage
-                    console.log('Imagem armazenada com sucesso');
-                    
-                    // Atualiza a exibição da imagem
-                    atualizar_imagem();
-                } else {
-                    console.log('Erro ao ler o arquivo.');
-                }
-            };
-
-            if (input_image.files[0]) {
-                reader.readAsDataURL(input_image.files[0]); // Converte o arquivo para Base64 e inicia a leitura
-            } else {
-                console.log('Nenhuma imagem foi selecionada.');
-            }
-        }
-
-        function atualizar_imagem() {
-            const exibe_img = document.getElementById('img');
-            const imagem = localStorage.getItem('image_input');
-            
-            exibe_img.src = imagem; // Define o src da imagem com a URL armazenada no localStorage
-            
-            console.log('Nenhuma imagem encontrada no localStorage.');
-            
-        }
-
-        async function upload(img) {
+        function upload(img) {
             const formData = new FormData()
             formData.append('image', img.files[0])
 
             try {
-                const response = await fetch('http://localhost:3000/upload', {
+                fetch('http://localhost:3000/upload', {
                     method: 'POST',
                     body: formData
                 })
-
-                if (!response.ok) {
-                    throw new Error('Erro ao enviar a imagem.')
-                }
-
-                // Obter a resposta como um Blob
-                const blob = await response.blob()
-
-                // Criar uma URL de objeto para a imagem
-                const imageUrl = URL.createObjectURL(blob)
-
-                // Exibir a imagem
-                const outputImage = document.getElementById('img')
-                outputImage.src = imageUrl
+            
+                .then(response => response.json())
+                .then(data => {
+                    const imageId = data.imageId
+                    console.log('ID: ', imageId) 
+                    if (imageId) {
+                        chama_pagina_edit(imageId)
+                    }
+                })
 
             } catch (error) {
                 console.error('Erro:', error)
             }
         }
 
+    function chama_pagina_edit(imageId) {
+        console.log('Chamando outra pagina')
+        sessionStorage.setItem('idDaImagem', imageId)
+        window.location.href = 'sobre.html'
+    }
+
+    function teste() {
+        try {
+            fetch('http://localhost:3000/getimage', {
+            method: 'GET'
+            })
+            .then(response => response.blob())  // Recebe a resposta como blob
+            .then(blob => {
+            // Cria uma URL temporária para o blob recebido
+            const url = URL.createObjectURL(blob);
+
+            // Seleciona o elemento img do HTML
+            const img = document.getElementById('img');
+
+            // Atribui a URL temporária ao src da imagem
+            img.src = url;
+            })
+            .catch(error => {
+            console.error('Erro ao carregar a imagem:', error);
+            });
+        } catch (error) {
+            console.error('Erro inesperado:', error);
+        }
+    }
+
         // Event listener para o input de arquivo
         const img = document.getElementById('fileinput')
-
         img.addEventListener('change', function() {
             const file = img.files[0]
             if (file) {
                 upload(img);
-                armazena_imagem(img)
             }
         });
-
     </script>
 </body>
 </html>

@@ -6,6 +6,25 @@
     <title>Document</title>
 </head>
 <body>
-    <img alt="a imagem deveria ser carregada aqui">
+    <img id="img" alt="a imagem deveria ser carregada aqui">
+
+    <script>
+
+        const imageId = sessionStorage.getItem('idDaImagem')
+
+        function busca_imagem() {
+           
+            fetch(`http://localhost:3000/check/${imageId}`)
+                    .then(response => response.ok ? response.blob() : Promise.reject())
+                    .then(blob => {
+                        document.getElementById('img').src = URL.createObjectURL(blob)
+                    })
+            .catch(() => setTimeout(busca_imagem, 3000))
+                
+        }
+        
+        busca_imagem()
+
+    </script>
 </body>
 </html>
